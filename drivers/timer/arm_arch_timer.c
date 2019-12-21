@@ -84,6 +84,7 @@ void z_clock_set_timeout(s32_t ticks, bool idle)
 	}
 
 	arm_arch_timer_set_compare(req_cycle + last_cycle);
+	arm_arch_timer_enable_event(1);
 	k_spin_unlock(&lock, key);
 
 #endif
