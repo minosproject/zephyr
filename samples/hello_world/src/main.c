@@ -10,4 +10,7 @@
 void main(void)
 {
 	printk("Hello World! %s\n", CONFIG_BOARD);
+
+	while (1)
+		k_sleep(1000);
 }
