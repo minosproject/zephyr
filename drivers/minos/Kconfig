@@ -1,0 +1,14 @@
+# Minos hypervisor driver configuration options
+#
+# Copyright (c) 2019 Le Min
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig MINOS
+	bool "Minos Hypervisor Driver"
+	depends on ARM64
+	help
+	  Include Minos hypervisor driver in system config
+
+module = MINOS
+module-str = minos
+source "subsys/logging/Kconfig.template.log_config"

@@ -59,3 +59,17 @@ void z_irq_spurious(void *unused)
 
 	z_arm64_fatal_error(K_ERR_SPURIOUS_IRQ, NULL);
 }
+
+#ifdef CONFIG_DYNAMIC_INTERRUPTS
+int arch_irq_connect_dynamic(unsigned int irq, unsigned int priority,
+			     void (*routine)(void *parameter), void *parameter,
+			     u32_t flags)
+{
+	int isr_offset = (irq >> 8) - 1 + CONFIG_2ND_LVL_ISR_TBL_OFFSET;
+
+	z_isr_install(isr_offset, routine, parameter);
+	z_arm64_irq_priority_set(irq, priority, flags);
+
+	return 0;
+}
+#endif

@@ -16,6 +16,11 @@ zephyr_sources_ifdef(
 )
 
 zephyr_sources_ifdef(
+  CONFIG_SHELL_BACKEND_VMBOX
+  shell_vmbox.c
+)
+
+zephyr_sources_ifdef(
   CONFIG_SHELL_BACKEND_DUMMY
   shell_dummy.c
 )
