@@ -18,23 +18,10 @@ LOG_MODULE_REGISTER(shell_vmbox);
 #define BUF_0_SIZE	4096
 #define BUF_1_SIZE	2048
 
-#define VMBOX_CONSOLE_IDX(idx, size)	(idx & (size - 1))
-
-/*
- * at least 8K size for the transfer buffer, and
- * in or out buffer size need 2^ align
- */
-struct hvc_ring {
-	volatile u32_t ridx;
-	volatile u32_t widx;
-	u32_t size;
-	char buf[0];
-};
-
 struct shell_vmbox {
 	struct device *dev;
-	struct hvc_ring *tx;
-	struct hvc_ring *rx;
+	struct vm_ring *tx;
+	struct vm_ring *rx;
 	void *context;
 	shell_transport_handler_t evt_handler;
 };
@@ -62,16 +49,16 @@ static int vmbox_shell_init(const struct shell_transport *transport,
 	dd = VMBOX_DEV_DATA(sh_vmbox->dev);
 	base = (unsigned long)dd->data_base;
 
-	/* init the hvc_ring tx and rx, use interrupt to handle
+	/* init the vm_ring tx and rx, use interrupt to handle
 	 * the read and write */
 	if (dd->backend) {
-		sh_vmbox->tx = (struct hvc_ring *)base;
-		sh_vmbox->rx = (struct hvc_ring *)(base +
-				sizeof(struct hvc_ring) + BUF_0_SIZE);
+		sh_vmbox->tx = (struct vm_ring *)base;
+		sh_vmbox->rx = (struct vm_ring *)(base +
+				sizeof(struct vm_ring) + BUF_0_SIZE);
 	} else {
-		sh_vmbox->rx = (struct hvc_ring *)base;
-		sh_vmbox->tx = (struct hvc_ring *)(base +
-				sizeof(struct hvc_ring) + BUF_0_SIZE);
+		sh_vmbox->rx = (struct vm_ring *)base;
+		sh_vmbox->tx = (struct vm_ring *)(base +
+				sizeof(struct vm_ring) + BUF_0_SIZE);
 	}
 
 	if (irq_connect_dynamic(dd->vring_irq, 0,
@@ -91,33 +78,33 @@ static int vmbox_shell_write(const struct shell_transport *transport,
 	u32_t ridx, widx;
 	struct shell_vmbox *sh_vmbox = (struct shell_vmbox *)transport->ctx;
 	const u8_t *data8 = (const u8_t *)data;
-	struct hvc_ring *ring = sh_vmbox->tx;
+	struct vm_ring *ring = sh_vmbox->tx;
 	struct vmbox_dev_data *dd = VMBOX_DEV_DATA(sh_vmbox->dev);
 
 	while (length) {
 again:
 		ridx = ring->ridx;
 		widx = ring->widx;
-		vmbox_mb();
+		vm_mb();
 
 		if ((widx - ridx) == ring->size) {
 			if (dd->ipc_in->state != VMBOX_DEV_STAT_OPENED) {
 				ridx += length;
 				ring->ridx = ridx;
-				vmbox_wmb();
+				vm_wmb();
 			} else {
 				vmbox_device_vring_event(dd);
 				goto again;
 			}
 		}
 
-		while ((send < length) && (widx - ridx) < ring->size) {
-			ring->buf[VMBOX_CONSOLE_IDX(widx++, ring->size)] =
+		while ((send < length) && ((widx - ridx) < ring->size)) {
+			ring->buf[VM_RING_IDX(widx++, ring->size)] =
 				data8[send++];
 		}
 
 		ring->widx = widx;
-		vmbox_mb();
+		vm_mb();
 
 		length -= send;
 		data8 += send;
@@ -137,13 +124,13 @@ static int vmbox_shell_read(const struct shell_transport *transport,
 		void *data, size_t length, size_t *cnt)
 {
 	struct shell_vmbox *sh_vmbox = (struct shell_vmbox *)transport->ctx;
-	struct hvc_ring *ring = sh_vmbox->rx;
+	struct vm_ring *ring = sh_vmbox->rx;
 	u32_t ridx, widx, recv = 0;
 	u8_t *buf = (u8_t *)data;
 
 	ridx = ring->ridx;
 	widx = ring->widx;
-	vmbox_mb();
+	vm_mb();
 
 	if ((widx - ridx) > ring->size) {
 		printk("vmbox_shell_read overflow happend\n");
@@ -151,10 +138,10 @@ static int vmbox_shell_read(const struct shell_transport *transport,
 	}
 
 	while ((ridx != widx) && (recv < length))
-		buf[recv++] = ring->buf[VMBOX_CONSOLE_IDX(ridx++, ring->size)];
+		buf[recv++] = ring->buf[VM_RING_IDX(ridx++, ring->size)];
 
 	ring->ridx = ridx;
-	vmbox_mb();
+	vm_mb();
 
 	*cnt = recv;
 

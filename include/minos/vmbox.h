@@ -11,6 +11,7 @@
 #include <kernel.h>
 #include <device.h>
 #include <sys/sys_io.h>
+#include <minos/minos.h>
 
 #define VMBOX_ANY_DEV_ID	0xffff
 #define VMBOX_ANY_VENDOR_ID	0xffff
@@ -117,16 +118,6 @@ struct vmbox_dev_data {
 
 #define VMBOX_DEV_DATA(dev) \
 	(struct vmbox_dev_data *)dev->driver_data;
-
-static inline void vmbox_mb(void)
-{
-	__ISB();
-}
-
-static inline void vmbox_wmb(void)
-{
-	__DMB();
-}
 
 static inline int
 vmbox_device_ipc_event(struct vmbox_dev_data *info, int event)
