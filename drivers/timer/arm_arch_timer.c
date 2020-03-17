@@ -71,9 +71,14 @@ void z_clock_set_timeout(s32_t ticks, bool idle)
 	ticks = (ticks == K_FOREVER) ? MAX_TICKS : ticks;
 	ticks = MAX(MIN(ticks - 1, (s32_t)MAX_TICKS), 0);
 
+	/*
+	 * change req_cycle from u32_t to u64_t when
+	 * req_cycle += CYC_PER_TICK may overflow then
+	 * it will cacuse timer irq storm
+	 */
 	k_spinlock_key_t key = k_spin_lock(&lock);
 	u64_t curr_cycle = arm_arch_timer_count();
-	u32_t req_cycle = ticks * CYC_PER_TICK;
+	u64_t req_cycle = ticks * CYC_PER_TICK;
 
 	/* Round up to next tick boundary */
 	req_cycle += (u32_t)(curr_cycle - last_cycle) + (CYC_PER_TICK - 1);
