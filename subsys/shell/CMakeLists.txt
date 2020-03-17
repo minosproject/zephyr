@@ -21,6 +21,11 @@ zephyr_sources_ifdef(
 )
 
 zephyr_sources_ifdef(
+  CONFIG_SHELL_BACKEND_VM
+  shell_vm_debug.c
+)
+
+zephyr_sources_ifdef(
   CONFIG_SHELL_BACKEND_DUMMY
   shell_dummy.c
 )
