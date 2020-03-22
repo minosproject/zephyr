@@ -12,13 +12,13 @@
 #include <soc.h>
 #include <minos/vmbox.h>
 
-#define VMBOX_CON_BASE	DT_VMBOX_CON_BASE_ADDRESS
+#define VMBOX_CON_BASE	DT_INST_0_MINOS_VMBOX_CONTROLLER_BASE_ADDRESS
 
 #define VMBOX_CON_REG()	\
-	((volatile struct vmbox_con_reg *)(DT_VMBOX_CON_BASE_ADDRESS))
+	((volatile struct vmbox_con_reg *)(VMBOX_CON_BASE))
 
 #define VMBOX_DEV_REG(id) \
-	((volatile struct vmbox_dev_reg *)((unsigned long)DT_VMBOX_CON_BASE_ADDRESS + \
+	((volatile struct vmbox_dev_reg *)((unsigned long)VMBOX_CON_BASE + \
 		VMBOX_CON_DEV_BASE + id * VMBOX_CON_DEV_SIZE))
 
 static int vmbox_init;
@@ -81,11 +81,6 @@ static void __vmbox_get_device_info(struct vmbox_dev_data *info,
 	info->vring_size = dev_reg->vring_size;
 	info->vring_irq = dev_reg->vring_irq;
 	info->ipc_irq = dev_reg->ipc_irq;
-
-#ifdef CONFIG_ARM64
-	info->vring_irq = (info->vring_irq + 1) << 8;
-	info->ipc_irq = (info->ipc_irq + 1) << 8;
-#endif
 
 	info->backend = !(did % 2);
 	info->data_base = info->vring_base + VMBOX_IPC_ALL_ENTRY_SIZE;

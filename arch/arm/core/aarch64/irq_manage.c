@@ -65,9 +65,7 @@ int arch_irq_connect_dynamic(unsigned int irq, unsigned int priority,
 			     void (*routine)(void *parameter), void *parameter,
 			     u32_t flags)
 {
-	int isr_offset = (irq >> 8) - 1 + CONFIG_2ND_LVL_ISR_TBL_OFFSET;
-
-	z_isr_install(isr_offset, routine, parameter);
+	z_isr_install(irq, routine, parameter);
 	z_arm64_irq_priority_set(irq, priority, flags);
 
 	return 0;

@@ -1,10 +1,7 @@
 # Copyright (c) 2019, Le Min
 # SPDX-License-Identifier: Apache-2.0
 
-title: Minos vmbox controller driver
-
-description: |
-        This is a representation of Minos vmbox controller
+description: This is a representation of Minos vmbox controller
 
 compatible: "minos,vmbox-controller"
 

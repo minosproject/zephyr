@@ -45,9 +45,6 @@ static int vm_shell_init(const struct shell_transport *transport,
 	sh->evt_handler = evt_handler;
 	sh->context = context;
 
-#ifdef CONFIG_ARM64
-	sh->irq = (sh->irq + 1) << 8;
-#endif
 	if (irq_connect_dynamic(sh->irq, 0, vm_shell_isr, sh, 0))
 		return -EIO;
 

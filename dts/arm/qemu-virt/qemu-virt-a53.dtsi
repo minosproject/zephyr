@@ -38,24 +38,31 @@
 	soc {
 		interrupt-parent = <&gic>;
 
-		gic: interrupt-controller@8000000 {
+		gic: interrupt-controller@2f000000 {
 			compatible = "arm,gic";
-			reg = <0x8000000 0x10000>,
-			      <0x8010000 0x10000>;
 			interrupt-controller;
+			reg = <0x2f000000 0x10000 0x2c000000 0x2000 0x2c010000 0x2000 0x2c02f000 0x2000>;
 			#interrupt-cells = <4>;
 			label = "GIC";
 			status = "okay";
 		};
 
-		uart0: uart@9000000 {
+		uart0: uart@1c0a0000 {
 			compatible = "arm,pl011";
-			reg = <0x9000000 0x1000>;
+			reg = <0x1c0a0000 0x1000>;
 			status = "disabled";
 			interrupts = <GIC_SPI 1 0 IRQ_TYPE_LEVEL>;
 			interrupt-names = "irq_0";
 			clocks = <&uartclk>;
 			label = "UART_0";
+		};
+
+		vmbox: vmbox_controller@20000000 {
+			compatible = "minos,vmbox-controller";
+			reg = <0x20000000 0x1000>;
+			interrupts = <GIC_SPI 10 0 IRQ_TYPE_LEVEL>;
+			interrupt-names = "irq_0";
+			label = "VMBOX_CON";
 		};
 
 		sharedirq0: sharedirq0 {
@@ -65,11 +72,6 @@
 			interrupt-controller;
 			#interrupt-cells = <0>;
 			status = "okay";
-		};
-
-		flash0: flash@0 {
-			compatible = "soc-nv-flash";
-			reg = <0x0 DT_SIZE_K(64)>;
 		};
 
 		arch_timer: timer {
