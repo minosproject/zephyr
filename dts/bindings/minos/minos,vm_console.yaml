@@ -1,0 +1,15 @@
+# Copyright (c) 2019, Le Min
+# SPDX-License-Identifier: Apache-2.0
+
+description: This is a representation of Minos vm debug console
+
+compatible: "minos,vm_console"
+
+include: base.yaml
+
+properties:
+        reg:
+          required: true
+
+        label:
+          required: true

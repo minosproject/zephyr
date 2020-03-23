@@ -1,0 +1,11 @@
+identifier: arm_fvp
+name: ARM FVP
+type: cpu
+arch: arm
+toolchain:
+  - zephyr
+  - cross-compile
+ram: 2048
+testing:
+  ignore_tags:
+    - interrupt

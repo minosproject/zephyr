@@ -168,7 +168,7 @@ static int enable_shell_debug_console(struct device *arg)
 		return -ENOENT;
 
 	sh_vm->irq = minos_hvc0(HVC_DC_GET_IRQ);
-	base = minos_hvc0(HVC_DC_GET_RING);
+	base = DT_INST_0_MINOS_VM_CONSOLE_BASE_ADDRESS;
 
 	sh_vm->rx = (struct vm_ring *)base;
 	sh_vm->tx = (struct vm_ring *)(base +
